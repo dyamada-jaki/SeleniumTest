@@ -1,0 +1,2 @@
+# SeleniumTest
+Seleniumを使用したテストコードのサンプル
