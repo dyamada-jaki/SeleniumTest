@@ -19,12 +19,19 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.OutputType;
+import org.openqa.selenium.Proxy;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.Proxy.ProxyType;
+import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.ie.InternetExplorerDriver;
+import org.openqa.selenium.remote.CapabilityType;
+import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Wait;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -36,9 +43,22 @@ public class TestCase001 {
 	
 	@Before
 	public void setUp() throws Exception {
-		File file = new File("D:/workspace/SeleniumTest/SeleniumTest01/driver/IEDriverServer.exe");
-		System.setProperty("webdriver.ie.driver", file.getAbsolutePath());
-		wd = new InternetExplorerDriver();
+//		File file = new File("driver/IEDriverServer.exe");
+//		System.setProperty("webdriver.ie.driver", file.getAbsolutePath());
+//		wd = new InternetExplorerDriver();
+
+//		String PROXY = "127.0.0.1";
+//		org.openqa.selenium.Proxy proxy = new org.openqa.selenium.Proxy();
+//		
+//		proxy.setProxyType(ProxyType.MANUAL);
+//		proxy.setNoProxy(PROXY);
+//		DesiredCapabilities cap = new DesiredCapabilities();
+//		cap.setCapability(CapabilityType.PROXY, proxy);
+//		wd = new FirefoxDriver(cap);
+		
+		File file = new File("driver/chromedriver.exe");
+		System.setProperty("webdriver.chrome.driver", file.getAbsolutePath());
+		wd = new ChromeDriver();
 		WebDriverAdapter.setAdapter(wd);
 	}
 
@@ -48,6 +68,10 @@ public class TestCase001 {
 		// ########## １画面目 ##########
 		// 初期画面ロード
 		wd.get("http://example.selenium.jp/reserveApp/");
+
+		// ***** 画面遷移終了を待つ *****
+        Wait<WebDriver> wait = new WebDriverWait(wd, 10);
+        wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//button[@id='goto_next']")));
 
 		// ***** スクリーンショットを撮っておく *****
 		TakesScreenshot tss = (TakesScreenshot)wd;
@@ -99,12 +123,15 @@ public class TestCase001 {
 
         // ***** 朝食バイキング（input.radio) *****
         element = wd.findElement(By.xpath("//input[@type='radio'][@name='bf'][@value='off']"));
+        element.sendKeys(Keys.CONTROL);
         element.click();
 
-        // ***** プラン（input.radio) *****
+        // ***** プラン（input.check) *****
         element = wd.findElement(By.name("plan_a"));
+        element.sendKeys(Keys.CONTROL);
         element.click();
         element = wd.findElement(By.name("plan_b"));
+        element.sendKeys(Keys.CONTROL);
         element.click();
 
 		// ***** 画面遷移前にスクリーンショットを撮っておく *****
@@ -116,24 +143,25 @@ public class TestCase001 {
 			e.printStackTrace();
 		}
 
-        // ***** プラン（button) *****
+        // ***** 次へ（button) *****
         element = wd.findElement(By.xpath("//button[@id='goto_next']"));
+        element.sendKeys(Keys.CONTROL);
         element.click();
 
 		// ########## ２画面目 ##########
         // ***** 画面遷移終了を待つ *****
-        Wait<WebDriver> wait = new WebDriverWait(wd, 10);
+        wait = new WebDriverWait(wd, 10);
         wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//button[@id='commit']")));
 
-		// ***** 画面遷移後にスクリーンショットを撮っておく *****
-		tss = (TakesScreenshot)wd;
-		filePath = FileSystems.getDefault().getPath("evidence", "ss", "001", "confirm01.png"); 
-		try {
-			Files.write(filePath, tss.getScreenshotAs(OutputType.BYTES));
-		} catch (WebDriverException | IOException e) {
-			e.printStackTrace();
-		}
-		
+//		// ***** 画面遷移後にスクリーンショットを撮っておく *****
+//		tss = (TakesScreenshot)wd;
+//		filePath = FileSystems.getDefault().getPath("evidence", "ss", "001", "confirm01.png"); 
+//		try {
+//			Files.write(filePath, tss.getScreenshotAs(OutputType.BYTES));
+//		} catch (WebDriverException | IOException e) {
+//			e.printStackTrace();
+//		}
+//		
 		// ***** HTMLファイルを出力しておく *****
 		htmlSrc = wd.getPageSource();
 		htmlPath = FileSystems.getDefault().getPath("evidence", "html", "001", "confirm.html"); 
@@ -150,7 +178,7 @@ public class TestCase001 {
 		String result = "";
 		// ***** 画面タイトル *****
 		result = wd.getTitle();
-		assertThat(result, is("予約内容確認"));
+//		assertThat(wd.getTitle(), is("予約内容確認"));
 		
 		// ***** 合計金額 *****
 		element = wd.findElement(By.xpath("//span[@id='price']"));
